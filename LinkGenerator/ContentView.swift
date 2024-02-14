@@ -168,13 +168,15 @@ extension ContentView {
 
         var linkType: LinkType = .url
 
-        static func readTest() async throws -> Test {
-            guard let url = URL(string: "https://filesamples.com/samples/code/json/sample1.json") else {
+        static func readTest() async throws -> CompaniesDTO {
+            guard let url = URL(
+                string: "https://raw.githubusercontent.com/bllizard22/link-generator/main/Identificators/companies.json"
+            ) else {
                 throw NSError()
             }
 
             let (data, _) = try await URLSession.shared.data(for: URLRequest(url: url))
-            let test = try JSONDecoder().decode(Test.self, from: data)
+            let test = try JSONDecoder().decode(CompaniesDTO.self, from: data)
 
             return test
         }
