@@ -2,13 +2,13 @@
     "companies": [
         {
             "name": "Revolut",
-            "id": 5356541
+            "search_id": 5356541
         }, {
             "name": "N26",
-            "id": 3116425
+            "search_id": 3116425
         }, {
             "name": "wise",
-            "id": 1769571
+            "search_id": 1769571
         }
     ]
 }

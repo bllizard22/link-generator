@@ -26,7 +26,7 @@ struct ContentView: View {
 
                     locationSection
                     sortingSection
-                }
+                }.padding(.bottom, 80)
                 if let resultURL = viewModel.makeResult() {
                     HStack {
                         Button {
@@ -43,9 +43,7 @@ struct ContentView: View {
                         .background(Color.cyan)
                         .cornerRadius(12)
                         Button {
-                            #if os(iOS)
                             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                            #endif
                             viewModel.saveData()
                         } label: {
                             Text("Save")
@@ -167,19 +165,6 @@ extension ContentView {
         var isFewApplicants = false
 
         var linkType: LinkType = .url
-
-        static func readTest() async throws -> CompaniesDTO {
-            guard let url = URL(
-                string: "https://raw.githubusercontent.com/bllizard22/link-generator/main/Identificators/companies.json"
-            ) else {
-                throw NSError()
-            }
-
-            let (data, _) = try await URLSession.shared.data(for: URLRequest(url: url))
-            let test = try JSONDecoder().decode(CompaniesDTO.self, from: data)
-
-            return test
-        }
 
         static func readFromStorage() -> Self {
             guard let data = UserDefaults.standard.value(forKey: "LinkedInLastSearch") as? Data,
@@ -525,6 +510,18 @@ extension Sequence where Element: Selection {
 
     func toString() -> String {
         self.map { $0.rawValue }
+            .sorted(by: { $0.lowercased() < $1.lowercased() })
+            .joined(separator: ", ")
+    }
+}
+
+extension Sequence where Element == SelectionDTO {
+    func toEncodedString() -> String {
+        self.map { "\($0.id)" }.joined(separator: "%2C")
+    }
+
+    func toString() -> String {
+        self.map { $0.name }
             .sorted(by: { $0.lowercased() < $1.lowercased() })
             .joined(separator: ", ")
     }

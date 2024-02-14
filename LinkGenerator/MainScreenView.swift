@@ -1,8 +1,34 @@
 import SwiftUI
 
-struct MainScreenView_Previews: PreviewProvider {
-    static var previews: some View {
-        MainScreenView()
+//struct MainScreenView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        MainScreenView()
+//    }
+//}
+
+final class ParametersManager {
+    var companies: [SelectionDTO] = []
+
+    func fetch() async {
+        do {
+            let data = try await readTest()
+            self.companies = data.companies
+        } catch {
+            assertionFailure("Data manager error: \(error)")
+        }
+    }
+
+    private func readTest() async throws -> CompaniesDTO {
+        guard let url = URL(
+            string: "https://raw.githubusercontent.com/bllizard22/link-generator/main/Identificators/companies.json"
+        ) else {
+            throw NSError()
+        }
+
+        let (data, _) = try await URLSession.shared.data(for: URLRequest(url: url))
+        let test = try JSONDecoder().decode(CompaniesDTO.self, from: data)
+
+        return test
     }
 }
 
@@ -10,17 +36,17 @@ struct MainScreenView: View {
 
     @Environment(\.openURL) private var openURL
     @State var model = ContentView.ViewModel.readFromStorage()
+    @State var sellComp: SelectionDTO = .init(name: "", searchID: -1)
+    @State var companies: [SelectionDTO] = []
+
+    var dataManager = ParametersManager()
 
     var body: some View {
         NavigationStack {
             List {
                 Section {
                     NavigationLink {
-#if os(macOS)
-                        MacOSContentView()
-#else
                         ContentView(viewModel: $model)
-#endif
                     } label: {
                         Text("Create new link")
                     }
@@ -49,21 +75,26 @@ struct MainScreenView: View {
                                         .truncationMode(.tail)
                                 }
                                 if !model.cities.isEmpty {
-                                    Text("CIty: " + model.cities.toString())
+                                    Text("City: " + model.cities.toString())
                                         .lineLimit(3)
                                         .truncationMode(.tail)
+                                }
+
+                                if !companies.isEmpty {
+                                    Text("Comps: " + companies.compactMap { $0.name }.joined(separator: ", ") )
+
+                                    Picker("", selection: $sellComp) {
+                                        ForEach(companies, id: \.id) {
+                                            Text($0.name).tag($0)
+                                        }
+                                    }
+                                    Text(sellComp.name)
                                 }
                             }
                             HStack {
                                 Button("Copy") {
-#if os(iOS)
                                     UIPasteboard.general.string = resultURL.absoluteString
                                     UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-#endif
-                                    Task {
-                                        let data = try? await ContentView.ViewModel.readTest()
-                                        print(data)
-                                    }
                                 }
                                 .buttonStyle(BorderlessButtonStyle())
                                 
@@ -81,6 +112,13 @@ struct MainScreenView: View {
                     } header: {
                         Text("Last used")
                     }
+            }
+        }
+        .task {
+            await dataManager.fetch()
+            self.companies = dataManager.companies
+            if let last = companies.last {
+                sellComp = last
             }
         }
     }
@@ -103,23 +141,14 @@ struct CompaniesDTO: Codable {
     var companies: [SelectionDTO]
 }
 
-struct SelectionDTO: Codable {
-    var name: String
-    var id: Int
-}
+struct SelectionDTO: Codable, Hashable, Identifiable {
+    var id: String { name + String(searchID) }
 
-//case revolut = "Revolut"
-//case n26 = "N26"
-//case wise = "Wise"
-//
-//var id: Self { self }
-//var queryID: String {
-//    switch self {
-//        case .revolut:
-//            "5356541"
-//        case .n26:
-//            "3116425"
-//        case .wise:
-//            "1769571"
-//    }
-//}
+    var name: String
+    var searchID: Int
+
+    enum CodingKeys: String, CodingKey {
+        case name
+        case searchID = "search_id"
+    }
+}
