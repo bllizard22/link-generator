@@ -1,16 +1,19 @@
 import SwiftUI
 
-//struct ContentView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        ContentView(storage: [.readFromStorage()]
-//    }
-//}
+struct ContentView_Previews: PreviewProvider {
+    @State static var model = ContentView.ViewModel.makeStubForPreview()
+
+    static var previews: some View {
+        ContentView(viewModel: $model)
+    }
+}
 
 @available(iOS 16, *)
 struct ContentView: View {
 
-    @Binding var viewModel: ViewModel
     @Environment(\.openURL) var openURL
+
+    @Binding var viewModel: ViewModel
 
     var body: some View {
         NavigationStack {
@@ -24,8 +27,21 @@ struct ContentView: View {
                         Text("You can use 'AND', 'OR', 'NOT', '(' and ')'")
                     }
 
+                    NavigationLink {
+                        SelectionListView(viewModel: $viewModel)
+                        .backgroundStyle(Color.primary)
+                        .navigationTitle("Country")
+                    } label: {
+                        Text("Select Companies")
+                    }
+
+                    Text("Comps: " + viewModel.companies.values
+                        .compactMap { $0.isSelected ? $0.name : nil }
+                        .joined(separator: ", "))
+
                     locationSection
                     sortingSection
+
                 }.padding(.bottom, 80)
                 if let resultURL = viewModel.makeResult() {
                     HStack {
@@ -65,6 +81,38 @@ struct ContentView: View {
     }
 }
 
+struct SelectionListView: View {
+    @Binding var viewModel: ContentView.ViewModel
+
+    var body: some View {
+        List(Array(viewModel.companies.values)) { company in
+            Button {
+                let updated = SelectionDTO(
+                    name: company.name,
+                    searchID: company.searchID,
+                    isSelected: !company.isSelected
+                )
+                viewModel.companies[company.searchID] = updated
+            } label: {
+                HStack {
+                    Text(company.name)
+                    Spacer()
+                    Image(
+                        systemName: company.isSelected
+                        ? "checkmark.circle.fill"
+                        : "circle"
+                    )
+                    .resizable()
+                    .frame(width: 24, height: 24)
+                    .foregroundColor(Color.gray)
+                }
+            }
+            .foregroundColor(Color.primary)
+        }
+        .navigationTitle("Select Companies")
+    }
+}
+
 private extension ContentView {
     var locationSection: some View {
         Section(
@@ -75,12 +123,6 @@ private extension ContentView {
                         case .title:
                             NavigationLink {
                                 SelectionList(model: $viewModel.titles).navigationTitle(parameter.rawValue)
-                            } label: {
-                                Text(parameter.rawValue)
-                            }
-                        case .company:
-                            NavigationLink {
-                                SelectionList(model: $viewModel.companies).navigationTitle(parameter.rawValue)
                             } label: {
                                 Text(parameter.rawValue)
                             }
@@ -152,7 +194,7 @@ extension ContentView {
         }
 
         var titles = Set<Title>()
-        var companies = Set<Company>()
+        var companies = [String: SelectionDTO]()
         var countries = Set<Country>()
         var cities = Set<City>()
 
@@ -186,6 +228,15 @@ extension ContentView {
                 isFewApplicants: model.isFewApplicants,
                 linkType: model.linkType
             )
+        }
+
+        func saveData() {
+            guard let data = try? JSONEncoder().encode(self) else {
+                assertionFailure("Should always succeed")
+                return
+            }
+
+            UserDefaults.standard.setValue(data, forKey: "LinkedInLastSearch")
         }
 
         func makeResult() -> URL? {
@@ -247,13 +298,23 @@ extension ContentView {
             return comps.url
         }
 
-        func saveData() {
-            guard let data = try? JSONEncoder().encode(self) else {
-                assertionFailure("Should always succeed")
-                return
-            }
-
-            UserDefaults.standard.setValue(data, forKey: "LinkedInLastSearch")
+        static func makeStubForPreview() -> Self {
+            ViewModel(
+                titles: [.iosDeveloper, .mobileDeveloper],
+                companies: [
+                    "1": .init(name: "Revolut", searchID: "1"),
+                    "2": .init(name: "Wise", searchID: "2")
+                ],
+                countries: [.uk, .germany],
+                cities: [.berlin],
+                timeUnit: .hour,
+                timeAmount: 3,
+                searchPhrase: "Some keys",
+                sorting: .recent,
+                isEasyApply: false,
+                isFewApplicants: true,
+                linkType: .url
+            )
         }
     }
 }
@@ -340,7 +401,6 @@ struct CheckboxStyle: ToggleStyle {
 
 enum ParametersNavigation: String, CaseIterable, Identifiable {
     case title = "Job Title"
-    case company = "Companies"
     case countries = "Countries"
     case cities = "Cities"
 
@@ -503,6 +563,8 @@ enum TimeUnit: String, Selection {
     }
 }
 
+// MARK: - Set and Dict helpers
+
 extension Sequence where Element: Selection {
     func toEncodedString() -> String {
         self.map { $0.queryID }.joined(separator: "%2C")
@@ -515,13 +577,13 @@ extension Sequence where Element: Selection {
     }
 }
 
-extension Sequence where Element == SelectionDTO {
+extension Dictionary where Key == String, Value == SelectionDTO {
     func toEncodedString() -> String {
-        self.map { "\($0.id)" }.joined(separator: "%2C")
+        self.map { "\($0.value.searchID)" }.joined(separator: "%2C")
     }
 
     func toString() -> String {
-        self.map { $0.name }
+        self.map { $0.value.searchID }
             .sorted(by: { $0.lowercased() < $1.lowercased() })
             .joined(separator: ", ")
     }

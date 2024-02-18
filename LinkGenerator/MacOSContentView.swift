@@ -86,12 +86,12 @@ private extension MacOSContentView {
                             } label: {
                                 Text(parameter.rawValue)
                             }
-                        case .company:
-                            NavigationLink {
-                                SelectionList(model: $viewModel.companies).navigationTitle(parameter.rawValue)
-                            } label: {
-                                Text(parameter.rawValue)
-                            }
+//                        case .company:
+//                            NavigationLink {
+//                                SelectionList(model: $viewModel.companies).navigationTitle(parameter.rawValue)
+//                            } label: {
+//                                Text(parameter.rawValue)
+//                            }
                         case .countries:
                             NavigationLink {
                                 SelectionList(model: $viewModel.countries).navigationTitle(parameter.rawValue)

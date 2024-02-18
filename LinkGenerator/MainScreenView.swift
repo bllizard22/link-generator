@@ -1,18 +1,22 @@
 import SwiftUI
 
-//struct MainScreenView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        MainScreenView()
-//    }
-//}
+struct MainScreenView_Previews: PreviewProvider {
+    static var previews: some View {
+        MainScreenView()
+    }
+}
 
-final class ParametersManager {
-    var companies: [SelectionDTO] = []
+class ParametersManager {
+    var companies: [String: SelectionDTO] = [:]
 
     func fetch() async {
         do {
             let data = try await readTest()
-            self.companies = data.companies
+            DispatchQueue.main.async {
+                self.companies = data.companies.reduce(into: [String: SelectionDTO]()) { (output, item) in
+                    output[String(item.searchID)] = .init(name: item.name, searchID: String(item.searchID))
+                }
+            }
         } catch {
             assertionFailure("Data manager error: \(error)")
         }
@@ -35,11 +39,9 @@ final class ParametersManager {
 struct MainScreenView: View {
 
     @Environment(\.openURL) private var openURL
-    @State var model = ContentView.ViewModel.readFromStorage()
-    @State var sellComp: SelectionDTO = .init(name: "", searchID: -1)
-    @State var companies: [SelectionDTO] = []
+    @State private var model = ContentView.ViewModel.readFromStorage()
 
-    var dataManager = ParametersManager()
+    private var dataManager = ParametersManager()
 
     var body: some View {
         NavigationStack {
@@ -80,16 +82,21 @@ struct MainScreenView: View {
                                         .truncationMode(.tail)
                                 }
 
-                                if !companies.isEmpty {
-                                    Text("Comps: " + companies.compactMap { $0.name }.joined(separator: ", ") )
-
-                                    Picker("", selection: $sellComp) {
-                                        ForEach(companies, id: \.id) {
-                                            Text($0.name).tag($0)
-                                        }
-                                    }
-                                    Text(sellComp.name)
-                                }
+                                Text(
+                                    "Manager: " + dataManager.companies
+                                        .compactMap { $0.value.name }
+                                        .joined(separator: ", ")
+                                )
+                                Text(
+                                    "Model: " + model.companies.values
+                                        .compactMap { $0.name }
+                                        .joined(separator: ", ")
+                                )
+                                Text(
+                                    "Sellected: " + model.companies.values
+                                        .compactMap { $0.isSelected ? $0.name : nil }
+                                        .joined(separator: ", ")
+                                )
                             }
                             HStack {
                                 Button("Copy") {
@@ -116,9 +123,12 @@ struct MainScreenView: View {
         }
         .task {
             await dataManager.fetch()
-            self.companies = dataManager.companies
-            if let last = companies.last {
-                sellComp = last
+            self.model.companies.merge(dataManager.companies) { old, new in
+                SelectionDTO(
+                    name: new.name,
+                    searchID: new.searchID,
+                    isSelected: old.isSelected
+                )
             }
         }
     }
@@ -138,11 +148,14 @@ struct MainScreenView: View {
 }
 
 struct CompaniesDTO: Codable {
-    var companies: [SelectionDTO]
+    var companies: [DTO]
 }
 
-struct SelectionDTO: Codable, Hashable, Identifiable {
-    var id: String { name + String(searchID) }
+protocol SelectableDTOProt: Selection {
+    var isSelected: Bool { get set }
+}
+
+struct DTO: Codable {
 
     var name: String
     var searchID: Int
@@ -151,4 +164,12 @@ struct SelectionDTO: Codable, Hashable, Identifiable {
         case name
         case searchID = "search_id"
     }
+}
+
+struct SelectionDTO: Equatable, Hashable, Codable, Identifiable {
+    var id: String { searchID }
+
+    var name: String
+    var searchID: String
+    var isSelected = false
 }
