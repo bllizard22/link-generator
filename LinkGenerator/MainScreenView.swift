@@ -40,6 +40,7 @@ struct MainScreenView: View {
 
     @Environment(\.openURL) private var openURL
     @State private var model = ContentView.ViewModel.readFromStorage()
+    @State var isLoaded: Bool = false
 
     private var dataManager = ParametersManager()
 
@@ -53,7 +54,8 @@ struct MainScreenView: View {
                         Text("Create new link")
                     }
                 }
-                Section {
+                if isLoaded {
+                    Section {
                         if let resultURL = model.makeResult() {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text(makeFiltersLine(model))
@@ -81,7 +83,7 @@ struct MainScreenView: View {
                                         .lineLimit(3)
                                         .truncationMode(.tail)
                                 }
-
+                                
                                 Text(
                                     "Manager: " + dataManager.companies
                                         .compactMap { $0.value.name }
@@ -119,6 +121,9 @@ struct MainScreenView: View {
                     } header: {
                         Text("Last used")
                     }
+                } else {
+                    Text("Fetching data...")
+                }
             }
         }
         .task {
@@ -130,6 +135,7 @@ struct MainScreenView: View {
                     isSelected: old.isSelected
                 )
             }
+            self.isLoaded = true
         }
     }
 
