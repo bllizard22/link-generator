@@ -1,0 +1,176 @@
+{
+    "companies": [
+        {
+            "name": "Revolut",
+            "search_id": 5356541
+        }, {
+            "name": "N26",
+            "search_id": 3116425
+        }, {
+            "name": "Wise",
+            "search_id": 1769571
+        }
+    ],
+    "titles": [
+        {
+            "name": "iOS Developer",
+            "search_id": 25204
+        },
+        {
+            "name": "Mobile Developer",
+            "search_id": 7110
+        },
+        {
+            "name": "Software Engineer",
+            "search_id": 9
+        },
+        {
+            "name": "Senior Software Engineer",
+            "search_id": 39
+        },
+        {
+            "name": "Lead Software Engineer",
+            "search_id": 1176
+        }
+    ],
+    "countries": [
+        {
+            "name": "Germany",
+            "search_id": 101282230
+        },
+        {
+            "name": "Netherlands",
+            "search_id": 102890719
+        },
+        {
+            "name": "Spain",
+            "search_id": 105646813
+        },
+        {
+            "name": "Portugal",
+            "search_id": 100364837
+        },
+        {
+            "name": "Sweden",
+            "search_id": 105117694
+        },
+        {
+            "name": "Finland",
+            "search_id": 100456013
+        },
+        {
+            "name": "Denmark",
+            "search_id": 104514075
+        },
+        {
+            "name": "Norway",
+            "search_id": 103819153
+        },
+        {
+            "name": "Czechia",
+            "search_id": 104508036
+        },
+        {
+            "name": "Poland",
+            "search_id": 105072130
+        },
+        {
+            "name": "Ireland",
+            "search_id": 104738515
+        },
+        {
+            "name": "UK",
+            "search_id": 101165590
+        },
+        {
+            "name": "France",
+            "search_id": 105015875
+        },
+        {
+            "name": "UAE",
+            "search_id": 104305776
+        },
+        {
+            "name": "Canada",
+            "search_id": 0
+        }
+    ],
+    "cities": [
+        {
+            "name": "Berlin",
+            "search_id": 106967730
+        },
+        {
+            "name": "Munich",
+            "search_id": 100477049
+        },
+        {
+            "name": "Hamburg",
+            "search_id": 106430557
+        },
+        {
+            "name": "Frankfurt",
+            "search_id": 103884904
+        },
+        {
+            "name": "Dusseldorf",
+            "search_id": 104008204
+        },
+        {
+            "name": "Barcelona",
+            "search_id": 105088894
+        },
+        {
+            "name": "Madrid",
+            "search_id": 103374081
+        },
+        {
+            "name": "Stockholm",
+            "search_id": 103264854
+        },
+        {
+            "name": "Gothenburg",
+            "search_id": 104114836
+        },
+        {
+            "name": "Malmö",
+            "search_id": 101759788
+        },
+        {
+            "name": "Helsinki",
+            "search_id": 106591199
+        },
+        {
+            "name": "Lisbon",
+            "search_id": 100092973
+        },
+        {
+            "name": "Porto",
+            "search_id": 100108932
+        },
+        {
+            "name": "Amsterdam",
+            "search_id": 103100785
+        },
+        {
+            "name": "Eindhoven",
+            "search_id": 102922143
+        },
+        {
+            "name": "Rotterdam",
+            "search_id": 103447814
+        },
+        {
+            "name": "Dubai",
+            "search_id": 100205264
+        },
+        {
+            "name": "Abu Dhabi",
+            "search_id": 104524176
+        },
+        {
+            "name": "Sharjah",
+            "search_id": 108354619
+        }
+    ]
+}
