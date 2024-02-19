@@ -35,11 +35,12 @@ struct ContentView: View {
                         Text("Select Companies")
                     }
 
-                    Text("Comps: " + viewModel.companies.values
+                    Text(
+                        "Comps: " + viewModel.parameters.companies.values
                         .compactMap { $0.isSelected ? $0.name : nil }
-                        .joined(separator: ", "))
+                        .joined(separator: ", ")
+                    )
 
-                    locationSection
                     sortingSection
 
                 }.padding(.bottom, 80)
@@ -85,14 +86,14 @@ struct SelectionListView: View {
     @Binding var viewModel: ContentView.ViewModel
 
     var body: some View {
-        List(Array(viewModel.companies.values)) { company in
+        List(Array(viewModel.parameters.companies.values)) { company in
             Button {
-                let updated = SelectionDTO(
+                let updated = Parameter(
                     name: company.name,
                     searchID: company.searchID,
                     isSelected: !company.isSelected
                 )
-                viewModel.companies[company.searchID] = updated
+                viewModel.parameters.companies[company.searchID] = updated
             } label: {
                 HStack {
                     Text(company.name)
@@ -114,35 +115,6 @@ struct SelectionListView: View {
 }
 
 private extension ContentView {
-    var locationSection: some View {
-        Section(
-            "Parameters",
-            content: {
-                ForEach(ParametersNavigation.allCases) { parameter in
-                    switch parameter {
-                        case .title:
-                            NavigationLink {
-                                SelectionList(model: $viewModel.titles).navigationTitle(parameter.rawValue)
-                            } label: {
-                                Text(parameter.rawValue)
-                            }
-                        case .countries:
-                            NavigationLink {
-                                SelectionList(model: $viewModel.countries).navigationTitle(parameter.rawValue)
-                            } label: {
-                                Text(parameter.rawValue)
-                            }
-                        case .cities:
-                            NavigationLink {
-                                SelectionList(model: $viewModel.cities).navigationTitle(parameter.rawValue)
-                            } label: {
-                                Text(parameter.rawValue)
-                            }
-                    }
-                }
-            }
-        )
-    }
 
     var sortingSection: some View {
         Section(
@@ -182,21 +154,12 @@ private extension ContentView {
 // MARK: - ViewModel
 
 extension ContentView {
-    struct Test: Codable {
-        var fruit: String
-        var size: String
-        var color: String
-    }
-
     struct ViewModel: Codable, Identifiable {
         var id: ObjectIdentifier {
             return .init(Self.self)
         }
 
-        var titles = Set<Title>()
-        var companies = [String: SelectionDTO]()
-        var countries = Set<Country>()
-        var cities = Set<City>()
+        var parameters = ParametersModel()
 
         var timeUnit = TimeUnit.day
         var timeAmount = 0
@@ -216,10 +179,7 @@ extension ContentView {
             }
 
             return ViewModel(
-                titles: model.titles,
-                companies: model.companies,
-                countries: model.countries,
-                cities: model.cities,
+                parameters: model.parameters,
                 timeUnit: model.timeUnit,
                 timeAmount: model.timeAmount,
                 searchPhrase: model.searchPhrase,
@@ -245,19 +205,19 @@ extension ContentView {
             let queries = [
                 URLQueryItem(
                     name: "f_T",
-                    value: titles.toEncodedString()
+                    value: parameters.titles.toEncodedString()
                 ),
                 URLQueryItem(
                     name: "f_C",
-                    value: companies.toEncodedString()
+                    value: parameters.companies.toEncodedString()
                 ),
                 URLQueryItem(
                     name: "f_CR",
-                    value: countries.toEncodedString()
+                    value: parameters.countries.toEncodedString()
                 ),
                 URLQueryItem(
                     name: "f_PP",
-                    value: cities.toEncodedString()
+                    value: parameters.cities.toEncodedString()
                 ),
                 URLQueryItem(
                     name: "f_TPR",
@@ -300,13 +260,15 @@ extension ContentView {
 
         static func makeStubForPreview() -> Self {
             ViewModel(
-                titles: [.iosDeveloper, .mobileDeveloper],
-                companies: [
-                    "1": .init(name: "Revolut", searchID: "1"),
-                    "2": .init(name: "Wise", searchID: "2")
-                ],
-                countries: [.uk, .germany],
-                cities: [.berlin],
+                parameters: ParametersModel(
+                    companies: [
+                        "1": .init(name: "Revolut", searchID: "1"),
+                        "2": .init(name: "Wise", searchID: "2", isSelected: true)
+                    ],
+                    titles: ["1": .init(name: "Software Engineer", searchID: "1")],
+                    countries: ["1": .init(name: "Ireland", searchID: "1")],
+                    cities: ["1": .init(name: "Dublin", searchID: "1")]
+                ),
                 timeUnit: .hour,
                 timeAmount: 3,
                 searchPhrase: "Some keys",
@@ -399,14 +361,6 @@ struct CheckboxStyle: ToggleStyle {
 
 // MARK: - Data models
 
-enum ParametersNavigation: String, CaseIterable, Identifiable {
-    case title = "Job Title"
-    case countries = "Countries"
-    case cities = "Cities"
-
-    var id: Self { self }
-}
-
 protocol Selection: CaseIterable, Identifiable, Hashable, Codable {
     var rawValue: String { get }
     var queryID: String { get }
@@ -415,113 +369,6 @@ protocol Selection: CaseIterable, Identifiable, Hashable, Codable {
 enum LinkType: Codable {
     case deeplink
     case url
-}
-
-enum Country: String, Selection {
-    case germany = "Germany"
-    case netherlands = "Netherlands"
-    case spain = "Spain"
-    case portugal = "Portugal"
-    case sweden = "Sweden"
-    case finland = "Finland"
-    case denmark = "Denmark"
-    case norway = "Norway"
-
-    case czechia = "Czechia"
-    case poland = "Poland"
-    case ireland = "Ireland"
-    case uk = "UK"
-    case france = "France"
-
-    case uae = "UAE"
-
-    var id: Self { self }
-    var queryID: String {
-        switch self {
-            case .germany:
-                "101282230"
-            case .netherlands:
-                "102890719"
-            case .spain:
-                "105646813"
-            case .portugal:
-                "100364837"
-            case .sweden:
-                "105117694"
-            case .finland:
-                "100456013"
-            case .denmark:
-                "104514075"
-            case .norway:
-                "103819153"
-            case .czechia:
-                "104508036"
-            case .poland:
-                "105072130"
-            case .ireland:
-                "104738515"
-            case .uk:
-                "101165590"
-            case .france:
-                "105015875"
-            case .uae:
-                "104305776"
-        }
-    }
-}
-
-enum City: String, Selection {
-    case berlin = "Berlin"
-
-    var id: Self { self }
-    var queryID: String {
-        switch self {
-            case .berlin:
-                "106967730"
-        }
-    }
-}
-
-enum Title: String, Selection {
-    case iosDeveloper = "iOS Developer"
-    case mobileDeveloper = "Mobile Developer"
-    case softwareEngineer = "Software Engineer"
-    case seniorSWE = "Senior Software Engineer"
-    case leadSWE = "Lead Software Engineer"
-
-    var id: Self { self }
-    var queryID: String {
-        switch self {
-            case .iosDeveloper:
-                "25204"
-            case .mobileDeveloper:
-                "7110"
-            case .softwareEngineer:
-                "9"
-            case .seniorSWE:
-                "39"
-            case .leadSWE:
-                "1176"
-        }
-    }
-}
-
-enum Company: String, Selection {
-    case revolut = "Revolut"
-    case n26 = "N26"
-    case wise = "Wise"
-
-    var id: Self { self }
-    var queryID: String {
-        switch self {
-            case .revolut:
-                "5356541"
-            case .n26:
-                "3116425"
-            case .wise:
-                "1769571"
-        }
-    }
 }
 
 enum Sorting: String, Selection {
@@ -577,13 +424,13 @@ extension Sequence where Element: Selection {
     }
 }
 
-extension Dictionary where Key == String, Value == SelectionDTO {
+extension Dictionary where Key == String, Value == Parameter {
     func toEncodedString() -> String {
         self.map { "\($0.value.searchID)" }.joined(separator: "%2C")
     }
 
     func toString() -> String {
-        self.map { $0.value.searchID }
+        self.map { $0.value.name }
             .sorted(by: { $0.lowercased() < $1.lowercased() })
             .joined(separator: ", ")
     }

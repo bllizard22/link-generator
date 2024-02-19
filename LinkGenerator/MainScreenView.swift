@@ -7,32 +7,32 @@ struct MainScreenView_Previews: PreviewProvider {
 }
 
 class ParametersManager {
-    var companies: [String: SelectionDTO] = [:]
+    var parameters: ParametersModel?
+
+    private let urlBase = "https://raw.githubusercontent.com/bllizard22/link-generator/main/Identificators/"
 
     func fetch() async {
         do {
-            let data = try await readTest()
+            let dto = try await fetchRemoteValues()
             DispatchQueue.main.async {
-                self.companies = data.companies.reduce(into: [String: SelectionDTO]()) { (output, item) in
-                    output[String(item.searchID)] = .init(name: item.name, searchID: String(item.searchID))
-                }
+                self.parameters = ParametersModel(from: dto)
             }
         } catch {
             assertionFailure("Data manager error: \(error)")
         }
     }
 
-    private func readTest() async throws -> CompaniesDTO {
+    private func fetchRemoteValues() async throws -> ParametersModelDTO {
         guard let url = URL(
-            string: "https://raw.githubusercontent.com/bllizard22/link-generator/main/Identificators/companies.json"
+            string: urlBase + "parameters.json"
         ) else {
             throw NSError()
         }
 
         let (data, _) = try await URLSession.shared.data(for: URLRequest(url: url))
-        let test = try JSONDecoder().decode(CompaniesDTO.self, from: data)
+        let parameters = try JSONDecoder().decode(ParametersModelDTO.self, from: data)
 
-        return test
+        return parameters
     }
 }
 
@@ -63,39 +63,39 @@ struct MainScreenView: View {
                                 if !model.searchPhrase.isEmpty {
                                     Text("Keywords: \(model.searchPhrase)")
                                 }
-                                if !model.titles.isEmpty {
-                                    Text("Title: " + model.titles.toString())
+                                if !model.parameters.titles.isEmpty {
+                                    Text("Title: " + model.parameters.titles.toString())
                                         .lineLimit(3)
                                         .truncationMode(.tail)
                                 }
-                                if !model.companies.isEmpty {
-                                    Text("Company: " + model.companies.toString())
+                                if !model.parameters.companies.isEmpty {
+                                    Text("Company: " + model.parameters.companies.toString())
                                         .lineLimit(3)
                                         .truncationMode(.tail)
                                 }
-                                if !model.countries.isEmpty {
-                                    Text("Country: " + model.countries.toString())
+                                if !model.parameters.countries.isEmpty {
+                                    Text("Country: " + model.parameters.countries.toString())
                                         .lineLimit(3)
                                         .truncationMode(.tail)
                                 }
-                                if !model.cities.isEmpty {
-                                    Text("City: " + model.cities.toString())
+                                if !model.parameters.cities.isEmpty {
+                                    Text("City: " + model.parameters.cities.toString())
                                         .lineLimit(3)
                                         .truncationMode(.tail)
                                 }
                                 
                                 Text(
-                                    "Manager: " + dataManager.companies
+                                    "Manager: " + (dataManager.parameters?.companies ?? [:])
                                         .compactMap { $0.value.name }
                                         .joined(separator: ", ")
                                 )
                                 Text(
-                                    "Model: " + model.companies.values
+                                    "Model: " + model.parameters.companies.values
                                         .compactMap { $0.name }
                                         .joined(separator: ", ")
                                 )
                                 Text(
-                                    "Sellected: " + model.companies.values
+                                    "Sellected: " + model.parameters.companies.values
                                         .compactMap { $0.isSelected ? $0.name : nil }
                                         .joined(separator: ", ")
                                 )
@@ -127,15 +127,26 @@ struct MainScreenView: View {
             }
         }
         .task {
+            defer { self.isLoaded = true }
+
             await dataManager.fetch()
-            self.model.companies.merge(dataManager.companies) { old, new in
-                SelectionDTO(
-                    name: new.name,
-                    searchID: new.searchID,
-                    isSelected: old.isSelected
-                )
+            guard let parameters = dataManager.parameters else {
+                return
             }
-            self.isLoaded = true
+
+            self.model.parameters.companies.merge(parameters.companies) { old, new in
+                Parameter(name: new.name, searchID: new.searchID, isSelected: old.isSelected)
+            }
+            self.model.parameters.titles.merge(parameters.titles) { old, new in
+                Parameter(name: new.name, searchID: new.searchID, isSelected: old.isSelected)
+            }
+            self.model.parameters.countries.merge(parameters.countries) { old, new in
+                Parameter(name: new.name, searchID: new.searchID, isSelected: old.isSelected)
+            }
+            self.model.parameters.cities.merge(parameters.cities) { old, new in
+                Parameter(name: new.name, searchID: new.searchID, isSelected: old.isSelected)
+            }
+
         }
     }
 
@@ -153,12 +164,11 @@ struct MainScreenView: View {
     }
 }
 
-struct CompaniesDTO: Codable {
-    var companies: [DTO]
-}
-
-protocol SelectableDTOProt: Selection {
-    var isSelected: Bool { get set }
+struct ParametersModelDTO: Codable {
+    var companies: [DTO]?
+    var titles: [DTO]?
+    var countries: [DTO]?
+    var cities: [DTO]?
 }
 
 struct DTO: Codable {
@@ -172,7 +182,39 @@ struct DTO: Codable {
     }
 }
 
-struct SelectionDTO: Equatable, Hashable, Codable, Identifiable {
+struct ParametersModel: Codable {
+    var companies: [String: Parameter]
+    var titles: [String: Parameter]
+    var countries: [String: Parameter]
+    var cities: [String: Parameter]
+
+    init(
+        companies: [String: Parameter] = [:],
+        titles: [String: Parameter] = [:],
+        countries: [String: Parameter] = [:],
+        cities: [String: Parameter] = [:]
+    ) {
+        self.companies = companies
+        self.titles = titles
+        self.countries = countries
+        self.cities = cities
+    }
+
+    init?(from dto: ParametersModelDTO) {
+        self.companies = Self.makeDict(from: dto.companies ?? [])
+        self.titles = Self.makeDict(from: dto.titles ?? [])
+        self.countries = Self.makeDict(from: dto.countries ?? [])
+        self.cities = Self.makeDict(from: dto.cities ?? [])
+    }
+
+    private static func makeDict(from dto: [DTO]) -> [String: Parameter] {
+        dto.reduce(into: [String: Parameter]()) { (output, item) in
+            output[String(item.searchID)] = .init(name: item.name, searchID: String(item.searchID))
+        }
+    }
+}
+
+struct Parameter: Equatable, Hashable, Codable, Identifiable {
     var id: String { searchID }
 
     var name: String
