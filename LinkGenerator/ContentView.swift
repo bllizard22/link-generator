@@ -27,12 +27,15 @@ struct ContentView: View {
                         Text("You can use 'AND', 'OR', 'NOT', '(' and ')'")
                     }
 
-                    NavigationLink {
-                        SelectionListView(viewModel: $viewModel)
-                        .backgroundStyle(Color.primary)
-                        .navigationTitle("Country")
-                    } label: {
-                        Text("Select Companies")
+                    Section {
+                        NavigationLink {
+                            SelectionListView(viewModel: $viewModel)
+                                .backgroundStyle(Color.primary)
+                                .navigationTitle("Country")
+                        } label: {
+                            Text("Select Companies")
+                        }
+
                     }
 
                     Text(
@@ -429,9 +432,15 @@ extension Dictionary where Key == String, Value == Parameter {
         self.map { "\($0.value.searchID)" }.joined(separator: "%2C")
     }
 
-    func toString() -> String {
-        self.map { $0.value.name }
-            .sorted(by: { $0.lowercased() < $1.lowercased() })
-            .joined(separator: ", ")
+    func toString(isSelected: Bool = false) -> String {
+        self.values.compactMap {
+            guard isSelected else {
+                return $0.name
+            }
+
+            return $0.isSelected ? $0.name : nil
+        }
+        .sorted(by: { $0.lowercased() < $1.lowercased() })
+        .joined(separator: ", ")
     }
 }

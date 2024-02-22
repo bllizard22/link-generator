@@ -59,46 +59,27 @@ struct MainScreenView: View {
                         if let resultURL = model.makeResult() {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text(makeFiltersLine(model))
-                                
+
+                                let companies = model.parameters.companies.toString(isSelected: true)
+                                let titles = model.parameters.titles.toString(isSelected: false)
+                                let countries = model.parameters.countries.toString(isSelected: true)
+                                let cities = model.parameters.cities.toString(isSelected: true)
+
                                 if !model.searchPhrase.isEmpty {
                                     Text("Keywords: \(model.searchPhrase)")
                                 }
-                                if !model.parameters.titles.isEmpty {
-                                    Text("Title: " + model.parameters.titles.toString())
-                                        .lineLimit(3)
-                                        .truncationMode(.tail)
+                                if companies.isEmpty {
+                                    Text("Title: " + companies).lineLimit(1)
                                 }
-                                if !model.parameters.companies.isEmpty {
-                                    Text("Company: " + model.parameters.companies.toString())
-                                        .lineLimit(3)
-                                        .truncationMode(.tail)
+                                if titles.isEmpty {
+                                    Text("Company: " + titles).lineLimit(1)
                                 }
-                                if !model.parameters.countries.isEmpty {
-                                    Text("Country: " + model.parameters.countries.toString())
-                                        .lineLimit(3)
-                                        .truncationMode(.tail)
+                                if countries.isEmpty {
+                                    Text("Country: " + countries).lineLimit(1)
                                 }
-                                if !model.parameters.cities.isEmpty {
-                                    Text("City: " + model.parameters.cities.toString())
-                                        .lineLimit(3)
-                                        .truncationMode(.tail)
+                                if cities.isEmpty {
+                                    Text("City: " + cities).lineLimit(1)
                                 }
-                                
-                                Text(
-                                    "Manager: " + (dataManager.parameters?.companies ?? [:])
-                                        .compactMap { $0.value.name }
-                                        .joined(separator: ", ")
-                                )
-                                Text(
-                                    "Model: " + model.parameters.companies.values
-                                        .compactMap { $0.name }
-                                        .joined(separator: ", ")
-                                )
-                                Text(
-                                    "Sellected: " + model.parameters.companies.values
-                                        .compactMap { $0.isSelected ? $0.name : nil }
-                                        .joined(separator: ", ")
-                                )
                             }
                             HStack {
                                 Button("Copy") {
