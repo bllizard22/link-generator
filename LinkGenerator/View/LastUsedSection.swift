@@ -7,49 +7,55 @@ struct LastUsedSection: View {
 
     var body: some View {
         Section {
-            if let resultURL = model.makeResult() {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(makeFiltersLine(model))
+            VStack(alignment: .leading, spacing: 8) {
+                Text(makeFiltersLine(model))
 
-                    let companies = model.parameters.companies.toString(isSelected: true)
-                    let titles = model.parameters.titles.toString(isSelected: true)
-                    let countries = model.parameters.countries.toString(isSelected: true)
-                    let cities = model.parameters.cities.toString(isSelected: true)
-
-                    if !model.searchPhrase.isEmpty {
-                        Text("Keywords: \(model.searchPhrase)")
-                    }
-                    if !companies.isEmpty {
-                        Text("Company: " + companies).lineLimit(1)
-                    }
-                    if !titles.isEmpty {
-                        Text("Title: " + titles).lineLimit(1)
-                    }
-                    if !countries.isEmpty {
-                        Text("Country: " + countries).lineLimit(1)
-                    }
-                    if !cities.isEmpty {
-                        Text("City: " + cities).lineLimit(1)
-                    }
+                let companies = model.parameters.companies.toString(isSelected: true)
+                let titles = model.parameters.titles.toString(isSelected: true)
+                let countries = model.parameters.countries.toString(isSelected: true)
+                let cities = model.parameters.cities.toString(isSelected: true)
+                
+                if !model.searchPhrase.isEmpty {
+                    Text("Keywords: \(model.searchPhrase)")
                 }
-                HStack {
-                    Button("Copy") {
+                if !companies.isEmpty {
+                    Text("Company: " + companies).lineLimit(1)
+                }
+                if !titles.isEmpty {
+                    Text("Title: " + titles).lineLimit(1)
+                }
+                if !countries.isEmpty {
+                    Text("Country: " + countries).lineLimit(1)
+                }
+                if !cities.isEmpty {
+                    Text("City: " + cities).lineLimit(1)
+                }
+            }
+
+            HStack {
+                Button("Copy") {
+                    if let resultURL = model.makeResult() {
                         UIPasteboard.general.string = resultURL.absoluteString
                         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                     }
-                    .buttonStyle(BorderlessButtonStyle())
-
-                    Spacer()
-
-                    Button {
-                        openURL(resultURL)
-                    } label: {
-                        Text("Open")
-                    }
-                    .buttonStyle(BorderlessButtonStyle())
                 }
-                .padding(.horizontal, 30)
+                .buttonStyle(BorderlessButtonStyle())
+                .foregroundColor(.cyan)
+
+                Spacer()
+
+                Button {
+                    if let resultURL = model.makeResult() {
+                        openURL(resultURL)
+                    }
+                } label: {
+                    Text("Open")
+                }
+                .buttonStyle(BorderlessButtonStyle())
+                .foregroundColor(.cyan)
             }
+            .padding(.horizontal, 40)
+
         } header: {
             Text("Last used")
         }

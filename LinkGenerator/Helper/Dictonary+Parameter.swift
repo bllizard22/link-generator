@@ -2,7 +2,8 @@ import Foundation
 
 extension Dictionary where Key == String, Value == Parameter {
     func toEncodedString() -> String {
-        self.map { "\($0.value.searchID)" }.joined(separator: "%2C")
+        self.values.compactMap { $0.isSelected ? "\($0.searchID)" : nil }
+        .joined(separator: "%2C")
     }
 
     func toString(isSelected: Bool = false) -> String {

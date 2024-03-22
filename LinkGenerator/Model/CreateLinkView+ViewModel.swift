@@ -18,36 +18,6 @@ extension CreateLinkView {
         var isEasyApply = false
         var isFewApplicants = false
 
-        static let lastListKey = "LinkedInLastSearch"
-
-        static func readFromStorage() -> Self {
-            guard let data = UserDefaults.standard.value(forKey: lastListKey) as? Data,
-                  let model = try? JSONDecoder().decode(Self.self, from: data)
-            else {
-                return ViewModel()
-            }
-
-            return ViewModel(
-                parameters: model.parameters,
-                timeUnit: model.timeUnit,
-                timeAmount: model.timeAmount,
-                searchPhrase: model.searchPhrase,
-                sorting: model.sorting,
-                linkType: model.linkType,
-                isEasyApply: model.isEasyApply,
-                isFewApplicants: model.isFewApplicants
-            )
-        }
-
-        func saveData() {
-            guard let data = try? JSONEncoder().encode(self) else {
-                assertionFailure("Should always succeed")
-                return
-            }
-
-            UserDefaults.standard.setValue(data, forKey: Self.lastListKey)
-        }
-
         func makeResult() -> URL? {
             let timeFactor = Int(timeUnit.queryID) ?? 0
 

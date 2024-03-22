@@ -8,7 +8,7 @@ struct MainScreenView_Previews: PreviewProvider {
 
 struct MainScreenView: View {
 
-    @State private var model = CreateLinkView.ViewModel.readFromStorage()
+    @State private var model = LocalParametersManager.readFromStorage()
     @State var isLoaded: Bool = false
 
     private var dataManager = ParametersManager()
@@ -35,9 +35,7 @@ struct MainScreenView: View {
         }
         .task {
             defer {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    self.isLoaded = true
-                }
+                self.isLoaded = true
             }
 
             await dataManager.fetch()

@@ -10,7 +10,7 @@ struct ButtonGroup: View {
         HStack {
             Button {
                 openURL(resultURL)
-                viewModel.saveData()
+                LocalParametersManager.saveData(viewModel)
             } label: {
                 Text("Open")
                     .fontWeight(Font.Weight.semibold)
@@ -24,7 +24,7 @@ struct ButtonGroup: View {
 
             Button {
                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                viewModel.saveData()
+                LocalParametersManager.saveData(viewModel)
             } label: {
                 Text("Save")
                     .fontWeight(Font.Weight.semibold)

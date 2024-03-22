@@ -29,6 +29,7 @@
 		488BC6502BAC4717009EE5B0 /* CheckboxStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 488BC64F2BAC4717009EE5B0 /* CheckboxStyle.swift */; };
 		488BC6532BAC476C009EE5B0 /* SortingSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 488BC6522BAC476C009EE5B0 /* SortingSection.swift */; };
 		488BC6552BAC4881009EE5B0 /* SelectionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 488BC6542BAC4881009EE5B0 /* SelectionListView.swift */; };
+		48D1A9802BADAF21004775D3 /* LocalParametersManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D1A97F2BADAF21004775D3 /* LocalParametersManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +55,7 @@
 		488BC64F2BAC4717009EE5B0 /* CheckboxStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckboxStyle.swift; sourceTree = "<group>"; };
 		488BC6522BAC476C009EE5B0 /* SortingSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortingSection.swift; sourceTree = "<group>"; };
 		488BC6542BAC4881009EE5B0 /* SelectionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionListView.swift; sourceTree = "<group>"; };
+		48D1A97F2BADAF21004775D3 /* LocalParametersManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalParametersManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -147,6 +149,7 @@
 			isa = PBXGroup;
 			children = (
 				488BC6442BAC4393009EE5B0 /* ParametersManager.swift */,
+				48D1A97F2BADAF21004775D3 /* LocalParametersManager.swift */,
 			);
 			path = Manager;
 			sourceTree = "<group>";
@@ -281,6 +284,7 @@
 				1A52F4FD2B7CC07B00418C7C /* CreateLinkView.swift in Sources */,
 				488BC6402BAC4315009EE5B0 /* Dictonary+Parameter.swift in Sources */,
 				1A52F4FB2B7CB99D00418C7C /* MainScreenView.swift in Sources */,
+				48D1A9802BADAF21004775D3 /* LocalParametersManager.swift in Sources */,
 				488BC6452BAC4393009EE5B0 /* ParametersManager.swift in Sources */,
 				488BC6502BAC4717009EE5B0 /* CheckboxStyle.swift in Sources */,
 				488BC63E2BAC42EF009EE5B0 /* Sequence+Selection.swift in Sources */,

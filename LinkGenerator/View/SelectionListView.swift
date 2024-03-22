@@ -7,12 +7,15 @@ struct SelectionNavLink: View {
     var body: some View {
         NavigationLink {
             SelectionListView(parameters: $parameters)
-                .backgroundStyle(Color.primary)
                 .navigationTitle(name)
         } label: {
-            Text(name)
-            Spacer()
-            Text(name)
+            HStack {
+                Text(name)
+                if parameters.contains(where: { $0.value.isSelected }) {
+                    Spacer()
+                    Image(systemName: "checkmark.circle.fill")
+                }
+            }
         }
     }
 }
@@ -40,7 +43,7 @@ struct SelectionListView: View {
                     )
                     .resizable()
                     .frame(width: 24, height: 24)
-                    .foregroundColor(Color.gray)
+                    .foregroundColor(Color.cyan)
                 }
             }
             .foregroundColor(Color.primary)
